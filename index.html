@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1f8a4c">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>モノポリー・アルティメット銀行</title>
@@ -420,6 +423,18 @@
                         </div>
                     </div>
                 `;
+            });
+        }
+        // Service Workerの登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker 登録成功:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker 登録失敗:', error);
+                    });
             });
         }
     </script>
