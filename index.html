@@ -55,6 +55,13 @@
 
     <h1>モノポリー・アルティメット銀行</h1>
 
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center; background: #fffbe6; border: 1px solid #ffeeba; margin-bottom: 15px; padding: 8px 12px;">
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <input type="checkbox" id="wakeLockToggle" onchange="toggleWakeLock()" style="width: 16px; height: 16px;">
+            <label for="wakeLockToggle" style="font-size: 14px; font-weight: bold; cursor: pointer;">🔆 画面消灯を防止</label>
+        </div>
+        <button class="btn-red btn-small" onclick="resetData()">🚨 データをリセット</button>
+    </div>
     <div class="supply-board">
         <span>🏠 家の残り: <span id="supplyHouses">32</span></span>
         <span>🏨 ホテルの残り: <span id="supplyHotels">12</span></span>
@@ -180,6 +187,60 @@
             { id: 'ut1', name: "電力会社", color: "#999", type: "utility", price: 150, owner: null, mortgaged: false },
             { id: 'ut2', name: "水道会社", color: "#999", type: "utility", price: 150, owner: null, mortgaged: false }
         ];
+        // --- データ保存・復元・リセット ---
+        function saveState() {
+            const state = { players, playerIdCounter, supply, properties };
+            localStorage.setItem('monopolyState', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('monopolyState');
+            if (saved) {
+                const state = JSON.parse(saved);
+                players = state.players;
+                playerIdCounter = state.playerIdCounter;
+                supply = state.supply;
+                properties = state.properties;
+                addLog("💾 前回プレイ時のデータを復元しました。");
+            }
+        }
+
+        function resetData() {
+            if (confirm("本当にすべてのデータをリセットしますか？この操作は取り消せません。")) {
+                localStorage.removeItem('monopolyState');
+                location.reload(); // ページをリロードして初期化
+            }
+        }
+        // --- 画面消灯防止 (Wake Lock API) ---
+        let wakeLock = null;
+
+        async function toggleWakeLock() {
+            const toggle = document.getElementById('wakeLockToggle');
+            if (toggle.checked) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    addLog("🔆 画面消灯を防止しています。");
+                } catch (err) {
+                    alert("お使いのブラウザは画面消灯防止機能に対応していません。");
+                    toggle.checked = false;
+                }
+            } else {
+                if (wakeLock !== null) {
+                    wakeLock.release();
+                    wakeLock = null;
+                    addLog("🌙 画面消灯防止を解除しました。");
+                }
+            }
+        }
+
+        // タブを切り替える等で裏側に回った際、WakeLockはブラウザ仕様で自動解除されます。
+        // 再び画面に戻ってきた時に、チェックが入っていれば再取得する処理です。
+        document.addEventListener('visibilitychange', async () => {
+            const toggle = document.getElementById('wakeLockToggle');
+            if (wakeLock !== null && document.visibilityState === 'visible' && toggle.checked) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        });
 
         // --- ツール系 ---
         function rollDice() {
@@ -361,6 +422,8 @@
             document.getElementById('supplyHotels').innerText = supply.hotels;
 
             const playerOpts = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            saveState(); 
+        }
             
             // 競売・購入用
             const unownedProps = properties.filter(p => !p.owner).map(p => `<option value="${p.id}">${p.name} (定価$${p.price})</option>`).join('');
@@ -425,6 +488,11 @@
                 `;
             });
         }
+                // --- アプリ初期化 ---
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            updateUI();
+        });
         // Service Workerの登録
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
