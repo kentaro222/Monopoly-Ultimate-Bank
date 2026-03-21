@@ -379,51 +379,11 @@
                 prop.mortgaged = false;
                 addLog(`🏦 $${value} 払い、<b>${prop.name}</b> の抵当を解除しました。`);
             }
-            updateUI();
-        }
-
-        function buildHouse(propId, isBuying) {
-            const prop = properties.find(p => p.id === propId);
-            const owner = players.find(p => p.id == prop.owner);
-            if (prop.mortgaged) return alert("抵当物件には建築できません。");
-
-            if (isBuying) {
-                if (prop.houses >= 5) return alert("これ以上建てられません。");
-                if (owner.balance < prop.housePrice) return alert("資金不足です。");
-                if (prop.houses < 4 && supply.houses <= 0) return alert("銀行に家の在庫がありません！");
-                if (prop.houses === 4 && supply.hotels <= 0) return alert("銀行にホテルの在庫がありません！");
-
-                owner.balance -= prop.housePrice;
-                prop.houses++;
-                if (prop.houses === 5) { supply.houses += 4; supply.hotels--; } else { supply.houses--; }
-                addLog(`🔨 <b>${prop.name}</b> に増築 (-$${prop.housePrice})`);
-            } else {
-                if (prop.houses <= 0) return;
-                owner.balance += prop.housePrice / 2;
-                if (prop.houses === 5) { 
-                    if(supply.houses < 4) return alert("銀行に家の在庫がなくダウングレード不可です");
-                    supply.houses -= 4; supply.hotels++; 
-                } else { supply.houses++; }
-                prop.houses--;
-                addLog(`🔨 <b>${prop.name}</b> の建物を売却 (+$${prop.housePrice / 2})`);
-            }
-            updateUI();
-        }
-
-        // --- UI更新 ---
-        function addLog(msg) {
-            const logArea = document.getElementById('log-area');
-            const time = new Date().toLocaleTimeString('ja-JP', { hour12: false });
-            logArea.insertAdjacentHTML('afterbegin', `<div class="log-entry">[${time}] ${msg}</div>`);
-        }
-
-        function updateUI() {
+                    function updateUI() {
             document.getElementById('supplyHouses').innerText = supply.houses;
             document.getElementById('supplyHotels').innerText = supply.hotels;
 
             const playerOpts = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            saveState(); 
-        }
             
             // 競売・購入用
             const unownedProps = properties.filter(p => !p.owner).map(p => `<option value="${p.id}">${p.name} (定価$${p.price})</option>`).join('');
@@ -487,7 +447,11 @@
                     </div>
                 `;
             });
+
+            // ⭕️ 正しく最後にデータ保存を実行
+            saveState(); 
         }
+
                 // --- アプリ初期化 ---
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
