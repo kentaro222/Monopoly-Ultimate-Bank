@@ -1,0 +1,21 @@
+{
+  "name": "モノポリー・アルティメット銀行",
+  "short_name": "モノポリー銀行",
+  "description": "モノポリーの資金・資産管理を完全デジタル化するアプリ",
+  "start_url": "./monopoly.html",
+  "display": "standalone",
+  "background_color": "#e6f0e6",
+  "theme_color": "#1f8a4c",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
