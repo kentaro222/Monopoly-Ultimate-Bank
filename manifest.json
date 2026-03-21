@@ -1,6 +1,6 @@
 {
-  "name": "モノポリー・アルティメット銀行",
-  "short_name": "モノポリー銀行",
+  "name": "Monopoly-Ultimate-Bank",
+  "short_name": "Monopoly-Bank",
   "description": "モノポリーの資金・資産管理を完全デジタル化するアプリ",
   "start_url": "./monopoly.html",
   "display": "standalone",
