@@ -1,6 +1,6 @@
 const CACHE_NAME = 'monopoly-bank-v1';
 const urlsToCache = [
-  './monopoly.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
